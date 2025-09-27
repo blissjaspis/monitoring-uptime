@@ -7,18 +7,34 @@ This Docker Compose setup runs Uptime Kuma with Caddy as a reverse proxy for aut
 - Docker and Docker Compose installed
 - A domain name pointing to your server
 
-## Setup
+## Setup Options
+
+### Option 1: Standalone Setup (with separate Caddy)
+If you want a completely separate Caddy instance for Uptime Kuma:
 
 1. Clone or download this repository
 2. Edit the `Caddyfile` and replace `your-domain.com` with your actual domain
-3. (Optional) Copy `env-example.txt` to `.env` and modify configuration as needed
-4. Run the containers:
+3. Run the containers:
 
 ```bash
 docker-compose up -d
 ```
 
-The `docker-compose.override.yml` file automatically loads environment variables from the `.env` file.
+**Note**: This runs Caddy on ports 8080 (HTTP) and 8443 (HTTPS) to avoid conflicts with your existing Caddy.
+
+### Option 2: Integrate with Existing Caddy (Recommended)
+If you already have Caddy running for Ghost CMS:
+
+1. Add the contents of `Caddyfile.alternative` to your existing Caddyfile
+2. Replace `uptime.yourdomain.com` with your desired subdomain
+3. Update the network name in `docker-compose.no-caddy.yml` to match your Ghost network
+4. Run:
+
+```bash
+docker-compose -f docker-compose.no-caddy.yml up -d
+```
+
+This approach uses your existing Caddy instance to proxy both Ghost and Uptime Kuma.
 
 ## Configuration
 
@@ -102,9 +118,10 @@ docker-compose logs caddy
 
 ### Common issues
 
-1. **Port 80/443 already in use**: Make sure no other web servers are running
+1. **Port 80/443 already in use**: If you have another Caddy instance running, use Option 2 (integrate with existing Caddy) instead of running a separate Caddy instance
 2. **Domain not resolving**: Ensure your domain DNS points to your server
-3. **SSL certificate issues**: Check that ports 80 and 443 are accessible from the internet
+3. **SSL certificate issues**: Check that ports 80 and 443 are accessible from the internet (important for Let's Encrypt)
+4. **Container networking**: Make sure both Caddy and Uptime Kuma are on the same Docker network if using separate containers
 
 ## Updating
 

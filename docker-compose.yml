@@ -1,16 +1,12 @@
-name: uptime-kuma
-
 services:
   uptime-kuma:
     image: louislam/uptime-kuma:2.0.0-beta.4
     container_name: uptime-kuma
-    ports:
-      - "3001:3001"
     volumes:
-      - ./data:/app/data
+      - uptime-kuma-data:/app/data
     restart: unless-stopped
     networks:
-      - uptime-kuma-network
+      - rigel-network
     environment:
       - UPTIME_KUMA_DISABLE_FRAME_SAMEORIGIN=0
     healthcheck:
@@ -20,29 +16,9 @@ services:
       retries: 3
       start_period: 40s
 
-  caddy:
-    image: caddy:2.10.2-alpine
-    container_name: caddy
-    ports:
-      - "80:80"
-      - "443:443"
-    volumes:
-      - ./Caddyfile:/etc/caddy/Caddyfile
-      - caddy_data:/data
-      - caddy_config:/config
-    restart: unless-stopped
-    environment:
-      DOMAIN: ${DOMAIN:?DOMAIN is required}
-    networks:
-      - uptime-kuma-network
-    depends_on:
-      uptime-kuma:
-        condition: service_healthy
+networks:
+  rigel-network:
+    external: true
 
 volumes:
-  caddy_data:
-  caddy_config:
-
-networks:
-  uptime-kuma-network:
-    driver: bridge
+  uptime-kuma-data:
